@@ -9,7 +9,7 @@ int net_init(void) {
 #endif
 }
 
-int net_send(int sockfd, cot_packet_t *pkt) {
+int net_send(sock_t sockfd, cot_packet_t *pkt) {
   send(sockfd, &pkt->len,     sizeof pkt->len,  0);
   send(sockfd, &pkt->type,    sizeof pkt->type, 0);
   send(sockfd, &pkt->data[0], pkt->len,         0);
