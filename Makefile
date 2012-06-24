@@ -6,7 +6,7 @@ CLIENT_SRC=src/net.c src/ui.c src/client.c
 CLIENT_OBJ=$(CLIENT_SRC:.c=.o)
 
 DAEMON_SRC=src/net.c src/daemon.c
-DAEMON_OBJ=$(CLIENT_SRC:.c=.o)
+DAEMON_OBJ=$(DAEMON_SRC:.c=.o)
 
 cotitan: $(CLIENT_OBJ)
 	$(CC) $(LDFLAGS) $(CLIENT_OBJ) -o $@
