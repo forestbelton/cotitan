@@ -10,5 +10,8 @@ void ui_place_obj(int c, int x, int y);
 /* Prints a formatted message to the event log. */
 void ui_printf   (int color, const char *msg, ...);
 
+/* Prompts the user to enter a line. */
+char *ui_prompt  (int echo, const char *msg);
+
 #endif
 
