@@ -1,5 +1,5 @@
 CC=gcc
-CFLAGS=-Iinclude -Wall -Wextra -Werror -ansi -pedantic -O2
+CFLAGS=-Iinclude -Wall -Wextra -Werror -ansi -pedantic -O2 -Wno-unused-parameter -Wno-unused-result
 LDFLAGS=
 
 CLIENT_SRC=src/net.c src/ui.c src/client.c
