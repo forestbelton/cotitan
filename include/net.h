@@ -3,6 +3,19 @@
 
 #include <stdint.h>
 
+/* Network headers */
+#ifndef _WIN32_
+#  define __USE_POSIX
+#  include <netdb.h>
+#  include <sys/types.h>
+#  include <sys/socket.h>
+   typedef int sock_t;
+#else
+#  include <winsock.h>
+#  define close(s) closesocket(s)
+   typedef SOCKET sock_t;
+#endif
+
 typedef struct {
   uint16_t  type;
   uint16_t  len;
@@ -14,15 +27,8 @@ typedef enum {
   PKT_SAY  = 0x0001 
 } cot_pktid_t;
 
-/* Connects to the cotitan daemon on the given host:port. */
-int net_init(const char *host, const char *port);
-
-/* Authenticates as a certain user. */
-int net_auth(const char *user, const char *pass);
-
-/* Sends a chat message. */
-void net_say(char *msg);
-void net_sayf(const char *msg, ...);
+int net_send(sock_t sockfd, cot_packet_t *pkt);
+int net_init(void);
 
 #endif
 

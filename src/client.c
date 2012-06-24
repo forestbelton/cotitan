@@ -1,4 +1,5 @@
 #include "net.h"
+#include "netc.h"
 #include "ui.h"
 
 #include <stdio.h>
@@ -19,9 +20,10 @@ int main(int argc, char *argv[]) {
   user = "apples";
   pass = "test";
   
-  net_init("localhost", "48581");
-  net_auth(user, pass);
-  net_say("This is a test");
+  net_init();
+  netc_connect("localhost", "48581");
+  netc_auth(user, pass);
+  netc_say("This is a test");
 
   return 0;
 }

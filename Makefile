@@ -2,7 +2,7 @@ CC=gcc
 CFLAGS=-Iinclude -Wall -Wextra -Werror -ansi -pedantic -O2 -Wno-unused-parameter -Wno-unused-result
 LDFLAGS=
 
-CLIENT_SRC=src/net.c src/ui.c src/client.c
+CLIENT_SRC=src/net.c src/netc.c src/ui.c src/client.c
 CLIENT_OBJ=$(CLIENT_SRC:.c=.o)
 
 DAEMON_SRC=src/net.c src/daemon.c
