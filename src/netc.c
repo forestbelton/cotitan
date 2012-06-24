@@ -43,12 +43,14 @@ int netc_connect(const char *hostname, const char *port) {
   DEBUG("calling getaddrinfo()");
   getaddrinfo(hostname, port, &hints, &res);
   
+  /* We should really be looping here. */
   DEBUG("calling socket()");
   clientfd = socket(res->ai_family, res->ai_socktype, res->ai_protocol);
   
   DEBUG("calling connect()");
   connect(clientfd, res->ai_addr, res->ai_addrlen);
   
+  freeaddrinfo(res);
   return 0;
 }
 
