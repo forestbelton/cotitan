@@ -1,6 +1,6 @@
 CC=gcc
-CFLAGS=-Iinclude -Wall -Wextra -Werror -ansi -pedantic -O2 -Wno-unused-parameter -Wno-unused-result
-LDFLAGS=
+CFLAGS=-Iinclude -Wall -Wextra -Werror -Wno-address -ansi -pedantic -O2 -Wno-unused-parameter -Wno-unused-result
+LDFLAGS=-lncurses
 
 CLIENT_SRC=src/net.c src/netc.c src/ui.c src/client.c
 CLIENT_OBJ=$(CLIENT_SRC:.c=.o)

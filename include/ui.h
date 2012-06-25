@@ -21,8 +21,21 @@
 #ifndef COTITAN_UI_H_
 #define COTITAN_UI_H_
 
+#include<stdbool.h>
+
+#define GAMEWIN_W 0.7
+#define GAMEWIN_H 0.75
+#define SIDEWIN_W (1-GAMEWIN_W)
+#define SIDEWIN_H GAMEWIN_H
+#define MSGWIN_W 1
+#define MSGWIN_H (1-GAMEWIN_H)
+
+
 /* Initializes the user interface. */
 void ui_init     (void);
+
+/* Give control of the thread to the UI. For mtime milliseconds. Setting this to 0 means keep going 'till user exits. */
+void ui_interact(int mtime);
 
 /* Places the character c at the coordinate (x,y) on the world map. */
 void ui_place_obj(int c, int x, int y);
@@ -31,7 +44,11 @@ void ui_place_obj(int c, int x, int y);
 void ui_printf   (int color, const char *msg, ...);
 
 /* Prompts the user to enter a line. */
+/* Note: For the sake of flexibility, this is placed on the heap. Don't forget to free() */
 char *ui_prompt  (int echo, const char *msg);
+
+/* Cleans up user interface */
+void ui_destroy(void);
 
 #endif
 

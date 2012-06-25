@@ -1,0 +1,4 @@
+#Ignore binaries
+*o
+src/*o
+test/*o
