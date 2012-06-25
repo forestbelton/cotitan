@@ -32,18 +32,25 @@ int main(int argc, char *argv[]) {
   ui_init();
 
   /* Once ui_read_line works, we'll use this instead: */
-#if 0
-  user = ui_prompt(0, "Username: ");
-  pass = ui_prompt(1, "Password: ");
-#endif
-  
-  user = "apples";
-  pass = "test";
+  user = ui_prompt(1, "Username: ");
+  ui_printf(5, "User name %s selected...",user);
+  pass = ui_prompt(0, "Password: ");
+  ui_printf(6, "Password entered...");
+ 
+  free(user);
+  free(pass);
+  /* user = "apples"; */
+  /* pass = "test"; */
+
+  ui_interact(0);
   
   net_init();
   netc_connect("localhost", "48581");
   netc_auth(user, pass);
   netc_say("This is a test");
+
+  
+  ui_destroy();
 
   return 0;
 }

@@ -128,6 +128,7 @@ void ui_place_obj(int c, int x, int y) {
 }
 
 void ui_printf(int color, const char *fmt, ...) {
+  static int p = 0;
   va_list vargs;
   attr_t oldattr;
   short oldclr;
@@ -136,8 +137,8 @@ void ui_printf(int color, const char *fmt, ...) {
   
   if(clr) {
     wattr_get(wnd[WMSG], &oldattr, &oldclr, 0);
-    init_pair(1, color, COLOR_BLACK);
-    wattron(wnd[WMSG],COLOR_PAIR(1));
+    init_pair(++p, color, COLOR_BLACK);
+    wattron(wnd[WMSG],COLOR_PAIR(p));
   }
 
   va_start(vargs,fmt);

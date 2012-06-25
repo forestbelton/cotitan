@@ -47,5 +47,8 @@ void ui_printf   (int color, const char *msg, ...);
 /* Note: For the sake of flexibility, this is placed on the heap. Don't forget to free() */
 char *ui_prompt  (int echo, const char *msg);
 
+/* Cleans up user interface */
+void ui_destroy(void);
+
 #endif
 
