@@ -42,7 +42,7 @@ void ui_init() {
 
   /* Set some global properties */
   initscr();
-  if( has_colors() ) {
+  if(has_colors()) {
     start_color();
   }else {
     DEBUG("Crappy terminal has no colors. Not using any.");
@@ -78,10 +78,10 @@ void ui_destroy() {
   fail = false;
   for(i=0;i<3;i++) {
     fail = delwin(wnd[i]) == ERR || delwin(wndbox[i]) == ERR;
-    if( fail ) break;
+    if(fail) break;
   }
 
-  if( fail ) DEBUG("Failed to delete ncurses window(s)");
+  if(fail) DEBUG("Failed to delete ncurses window(s)");
   endwin();
 }
 
@@ -90,30 +90,32 @@ void ui_interact(int msec) {
   /* Set mode */
   keypad(wndbox[WGAME],true);
   /* Set delay to n milliseconds */
-  if( msec > 0 ) {
+  if(msec > 0) {
     total = msec;
     wtimeout(wndbox[WGAME],50);
+  }else{
+    total = 0;
   }
   
   errlvl = 0;
   while(1) {
     c = wgetch(wndbox[WGAME]);
     total -= 50;
-    if( c == ERR ) {
-      if( msec > 0 ) {
+    if(c == ERR) {
+      if(msec > 0) {
 	/* Timed out */
-	if( total <= 0 ) break;
+	if(total <= 0) break;
       }else {
 	/* Probably a real error */
 	errlvl++;
-	if( errlvl >= 5 ) break;
+	if(errlvl >= 5) break;
 	break;
       }
     }else {
       ct_process(c);
     }
   }
-  if( msec > 0 ) wtimeout(wndbox[WGAME],-1);
+  if(msec > 0) wtimeout(wndbox[WGAME],-1);
 }
 
 void ui_place_obj(int c, int x, int y) {
@@ -123,79 +125,98 @@ void ui_place_obj(int c, int x, int y) {
 
 void ui_printf(int color, const char *fmt, ...) {
   va_list vargs;
+  attr_t oldattr;
+  short oldclr;
   bool clr;
   clr = has_colors();
-  if( clr ) attron(COLOR_PAIR(color));
+  
+  if(clr) {
+    wattr_get(wnd[WMSG], &oldattr, &oldclr, 0);
+    init_pair(1, color, COLOR_BLACK);
+    wattron(wnd[WMSG],COLOR_PAIR(1));
+  }
+
   va_start(vargs,fmt);
+
   vwprintw(wnd[WMSG],fmt,vargs);
   waddch(wnd[WMSG],'\n');
+
   va_end(vargs);
+
   ct_wrefresh(WMSG);
-  if( clr ) attroff(COLOR_PAIR(color));
+  if(clr) {
+    wattr_set(wnd[WMSG],oldattr,oldclr,0);
+  }
 }
 
 char *ui_prompt(int doecho, const char *msg) {
   char *store;
+
   /* Set up modes */
-  if( doecho ) echo();
+  if(doecho) echo();
   else noecho();
   nocbreak();
   store = (char*)malloc(sizeof(char)*1024);
+
   /* First, we need to send the cursor to bottom screen */
   mvwprintw(wnd[WGAME], (int)(GAMEWIN_H*curh)-3, 0, msg);
   ct_wrefresh(WGAME);
   wgetnstr(wnd[WGAME],store,1024);
+
   /* Clear line */
   wmove(wnd[WGAME], (int)(GAMEWIN_H*curh)-3, 0);
   wclrtobot(wnd[WGAME]);
   ct_wrefresh(WGAME);
+
   /* Reset mode */
   noecho(); cbreak();
+
   return store;
 }
 
 /* Some bundled window operations (Change both window and border window) */
 
 bool ct_winit(WINDOW* w) {
-  if( w == 0 ) return false;
+  if(w == 0) return false;
+
   /* Setup common properties */
   wtimeout(w,-1);
   keypad(w, true);
+
   return true;
 }
 
 bool ct_wrefresh(int i) {
-  if( wrefresh(wnd[i]) == ERR || wrefresh(wndbox[i]) == ERR ) return false;
+  if(wrefresh(wnd[i]) == ERR || wrefresh(wndbox[i]) == ERR) return false;
   return true;
 }
 
 bool ct_wmvresize(int i, int h, int w, int y, int x) {
-  if( mvwin( wndbox[i], y, x ) == ERR ) return false;
-  if( wresize( wndbox[i], h, w ) == ERR ) return false;
-  if( mvwin( wnd[i], y+1, x+1 ) == ERR ) return false;
-  if( wresize( wnd[i], h-2, w-2 ) == ERR ) return false;
+  if(mvwin( wndbox[i], y, x ) == ERR) return false;
+  if(wresize( wndbox[i], h, w ) == ERR) return false;
+  if(mvwin( wnd[i], y+1, x+1 ) == ERR) return false;
+  if(wresize( wnd[i], h-2, w-2 ) == ERR) return false;
   return true;
 }
 
 bool ct_layout(int h, int w, int y, int x) {
   /* Calculate actual dimensions based on constant ratios */
   curw = w; curh = h; curx = x; cury = y;
-  if( ct_wmvresize( WGAME, (int)(GAMEWIN_H*h), (int)(GAMEWIN_W*w), y, x ) == false ) return false;
-  if( ct_wmvresize( WSIDE, (int)(SIDEWIN_H*h), (int)(SIDEWIN_W*w) , y, x+(int)(GAMEWIN_W*w) ) == false ) return false;
-  if( ct_wmvresize( WMSG, (int)(MSGWIN_H*h), (int)(MSGWIN_W*w), y+(int)(GAMEWIN_H*h), x ) == false ) return false;
-  if( ct_border() == false ) return false;
+  if(ct_wmvresize( WGAME, (int)(GAMEWIN_H*h), (int)(GAMEWIN_W*w), y, x ) == false) return false;
+  if(ct_wmvresize( WSIDE, (int)(SIDEWIN_H*h), (int)(SIDEWIN_W*w) , y, x+(int)(GAMEWIN_W*w) ) == false) return false;
+  if(ct_wmvresize( WMSG, (int)(MSGWIN_H*h), (int)(MSGWIN_W*w), y+(int)(GAMEWIN_H*h), x ) == false) return false;
+  if(ct_border() == false) return false;
   return true;
 }
 
 bool ct_border() {
-  if( box( wndbox[WGAME], 0, 0 ) == ERR ) return false;
-  if( box( wndbox[WSIDE], 0, 0 ) == ERR ) return false;
-  if( box( wndbox[WMSG], 0, 0 ) == ERR ) return false;
+  if(box( wndbox[WGAME], 0, 0 ) == ERR) return false;
+  if(box( wndbox[WSIDE], 0, 0 ) == ERR) return false;
+  if(box( wndbox[WMSG], 0, 0 ) == ERR) return false;
   return true;
 }
 
 bool ct_process(int k) {
-  static curX = 4, curY = 4;
   /* Handle key press */
   /* @TODO Send event to server etc. */
   return true;
