@@ -1,36 +1,44 @@
 /* Copyright (c) 2012 Forest Belton (apples)
-*
-* Permission is hereby granted, free of charge, to any person obtaining a copy
-* of this software and associated documentation files (the "Software"), to deal
-* in the Software without restriction, including without limitation the rights
-* to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-* copies of the Software, and to permit persons to whom the Software is
-* furnished to do so, subject to the following conditions:
-*
-* The above copyright notice and this permission notice shall be included in
-* all copies or substantial portions of the Software.
-*
-* THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-* IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-* FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-* AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-* LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-* OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-* THE SOFTWARE.
-*/
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 #include "ui.h"
 #include "misc.h"
+
 #include<stdlib.h>
-#include<stdbool.h>
 #include<ncurses.h>
 
+#define WGAME 0x0
+#define WMSG 0x1
+#define WSIDE 0x2
+
+static bool ct_winit(WINDOW* w);
+static bool ct_wrefresh(int i);
+static bool ct_wmvresize(int i, int h, int w, int y, int x);
 static bool ct_layout(int,int,int,int);
 static bool ct_process(int);
 static bool ct_border();
-static WINDOW *game, *msg, *side;
-static int curw, curh;
+static WINDOW *wnd[5], *wndbox[5];
+static int curw, curh, curx, cury;
 
 void ui_init() {
+  int i;
   /* Set some basic properties */
   initscr();
   if( has_colors() ){
@@ -40,39 +48,44 @@ void ui_init() {
   }
   /* No line buffering, take function keys  */
   cbreak();
-  keypad(stdscr, true);
   noecho();
   /* Make some windows */
-  game = newwin(1,1,1,1);
-  msg = newwin(1,1,1,1);
-  side = newwin(1,1,1,1);
+  for(i=0;i<3;i++){
+    wnd[i] = newwin(1,1,1,1); wndbox[i] = newwin(1,1,1,1);
+    /* Set properties of specific windows */
+    ct_winit(wnd[i]);
+  }
+  scrollok(wnd[WMSG],true);
   /* Default terminal size */
   /* @TODO Find portable way of detecting this */
   ct_layout(25,80,0,0);
-  wrefresh(game);
-  wrefresh(msg);
-  wrefresh(side);
+  for(i=0;i<3;i++) ct_wrefresh(i);
 }
 
 void ui_destroy(){
-  if(
-     delwin( game ) == ERR ||
-     delwin( msg ) == ERR ||
-     delwin( side ) == ERR
-   ) DEBUG("Failed to destroy ncurses window(s)");
+  int i;
+  bool fail;
+  fail = false;
+  for(i=0;i<3;i++){
+    fail = delwin(wnd[i]) == ERR || delwin(wndbox[i]) == ERR;
+    if( fail ) break;
+  }
+  if( fail ) DEBUG("Failed to delete ncurses window(s)");
   endwin();
 }
 
 void ui_interact(int msec){
   int total, c, errlvl;
+  /* Set mode */
+  keypad(wndbox[WGAME],true);
   /* Set delay to n milliseconds */
   if( msec > 0 ){
     total = msec;
-    wtimeout(game,50);
+    wtimeout(wndbox[WGAME],50);
   }
   errlvl = 0;
   while(1){
-    c = wgetch(game);
+    c = wgetch(wndbox[WGAME]);
     total -= 50;
     if( c == ERR ){
       if( msec > 0 ){
@@ -88,14 +101,12 @@ void ui_interact(int msec){
       ct_process(c);
     }
   }
-  if( msec > 0 ) wtimeout(game,-1);
+  if( msec > 0 ) wtimeout(wndbox[WGAME],-1);
 }
 
 void ui_place_obj(int c, int x, int y){
-  char b[2];
-  b[0] = c; b[1] = 0;
-  mvwprintw(game,y,x,b);
-  wrefresh(game);
+  mvwaddch(wnd[WGAME],y,x,c);
+  ct_wrefresh(WGAME);
 }
 
 void ui_printf(int color, const char *fmt, ...){
@@ -104,13 +115,14 @@ void ui_printf(int color, const char *fmt, ...){
   clr = has_colors();
   if( clr ) attron(COLOR_PAIR(color));
   va_start(vargs,fmt);
-  vwprintw(msg,fmt,vargs);
+  vwprintw(wnd[WMSG],fmt,vargs);
+  waddch(wnd[WMSG],'\n');
   va_end(vargs);
-  wrefresh(msg);
+  ct_wrefresh(WMSG);
   if( clr ) attroff(COLOR_PAIR(color));
 }
 
-char *ui_prompt  (int doecho, const char *msg){
+char *ui_prompt(int doecho, const char *msg){
   char *store;
   /* Set up modes */
   if( doecho ) echo();
@@ -118,54 +130,85 @@ char *ui_prompt  (int doecho, const char *msg){
   nocbreak();
   store = (char*)malloc(sizeof(char)*1024);
   /* First, we need to send the cursor to bottom screen */
-  mvwprintw(game, (int)(GAMEWIN_H*curh)-1, 0, msg);
-  wrefresh(game);
-  wgetnstr(game,store,1024);
+  mvwprintw(wnd[WGAME], (int)(GAMEWIN_H*curh)-3, 0, msg);
+  ct_wrefresh(WGAME);
+  wgetnstr(wnd[WGAME],store,1024);
+  /* Clear line */
+  wmove(wnd[WGAME], (int)(GAMEWIN_H*curh)-3, 0);
+  wclrtobot(wnd[WGAME]);
+  ct_wrefresh(WGAME);
   /* Reset mode */
   noecho(); cbreak();
   return store;
 }
 
+/* Some bundled window operations (Change both window and border window) */
+
+bool ct_winit(WINDOW* w){
+  if( w == 0 ) return false;
+  /* Setup common properties */
+  wtimeout(w,-1);
+  keypad(w, true);
+  return true;
+}
+
+bool ct_wrefresh(int i){
+  if( wrefresh(wnd[i]) == ERR || wrefresh(wndbox[i]) == ERR ) return false;
+  return true;
+}
+
+bool ct_wmvresize(int i, int h, int w, int y, int x){
+  if( mvwin( wndbox[i], y, x ) == ERR ) return false;
+  if( wresize( wndbox[i], h, w ) == ERR ) return false;
+  if( mvwin( wnd[i], y+1, x+1 ) == ERR ) return false;
+  if( wresize( wnd[i], h-2, w-2 ) == ERR ) return false;
+  return true;
+}
+
 bool ct_layout(int h, int w, int y, int x){
   /* Calculate actual dimensions based on constant ratios */
-  curw = w; curh = h;
-  return
-    mvwin( game, y, x ) != ERR &&
-    wresize( game, (int)(GAMEWIN_H*h), (int)(GAMEWIN_W*w) ) != ERR &&
-    mvwin( side, 0, (int)(GAMEWIN_W*w) ) != ERR &&
-    wresize( side, (int)(SIDEWIN_H*h), (int)(SIDEWIN_W*w) ) != ERR &&
-    mvwin( msg, (int)(GAMEWIN_H*h), 0 ) != ERR &&
-    wresize( msg, (int)(MSGWIN_H*h), (int)(MSGWIN_W*w) ) != ERR &&
-    ct_border()
-    ? true : false;
+  curw = w; curh = h; curx = x; cury = y;
+  if( ct_wmvresize( WGAME, (int)(GAMEWIN_H*h), (int)(GAMEWIN_W*w), y, x ) == false ) return false;
+  if( ct_wmvresize( WSIDE, (int)(SIDEWIN_H*h), (int)(SIDEWIN_W*w) , y, x+(int)(GAMEWIN_W*w) ) == false ) return false;
+  if( ct_wmvresize( WMSG, (int)(MSGWIN_H*h), (int)(MSGWIN_W*w), y+(int)(GAMEWIN_H*h), x ) == false ) return false;
+  if( ct_border() == false ) return false;
+  return true;
 }
 
 bool ct_border(){
-  return
-    box( game, 0, 0 ) != ERR &&
-    box( side, 0, 0 ) != ERR &&
-    box( msg, 0, 0 ) != ERR
-    ? true : false;
-}
-
-bool ct_stylize(WINDOW* w){
-  if( w == 0 ) return false;
-  
+  if( box( wndbox[WGAME], 0, 0 ) == ERR ) return false;
+  if( box( wndbox[WSIDE], 0, 0 ) == ERR ) return false;
+  if( box( wndbox[WMSG], 0, 0 ) == ERR ) return false;
   return true;
 }
 
 bool ct_process(int k){
+  static curX = 4, curY = 4;
   /* Handle key press */
   /* @TODO Send event to server etc. */
+  /* @TEST NOTE: THIS IS TEST CODE */
+  char *c;
+  if( k == 'p' ){
+    c = ui_prompt(1,"ENTER:");
+    ui_printf(2,c);
+    free(c);
+  }else if( k == KEY_UP ){
+    ui_place_obj(' ', curX, curY );
+    ui_place_obj('X', curX, --curY);
+    ct_wrefresh(WGAME);
+  }else if( k == KEY_LEFT ){
+    ui_place_obj(' ', curX, curY );
+    ui_place_obj('X', --curX, curY);
+    ct_wrefresh(WGAME);
+  }else if( k == KEY_DOWN ){
+    ui_place_obj(' ', curX, curY );
+    ui_place_obj('X', curX, ++curY);
+    ct_wrefresh(WGAME);
+  }else if( k == KEY_RIGHT ){
+    ui_place_obj(' ', curX, curY );
+    ui_place_obj('X', ++curX, curY);
+    ct_wrefresh(WGAME);
+  }
   return true;
 }
 
-
-int ui_test(){
-  ui_init();
-  while(1){
-    ui_interact(500);
-    ui_printf(0,ui_prompt(1,"ENTER:"));
-  }
-  ui_destroy();
-}

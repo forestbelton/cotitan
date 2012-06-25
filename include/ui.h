@@ -21,8 +21,10 @@
 #ifndef COTITAN_UI_H_
 #define COTITAN_UI_H_
 
+#include<stdbool.h>
+
 #define GAMEWIN_W 0.7
-#define GAMEWIN_H 0.8
+#define GAMEWIN_H 0.75
 #define SIDEWIN_W (1-GAMEWIN_W)
 #define SIDEWIN_H GAMEWIN_H
 #define MSGWIN_W 1
