@@ -212,8 +212,13 @@ bool ct_wmvresize(int i, int h, int w, int y, int x) {
 }
 
 bool ct_layout(int h, int w, int y, int x) {
+  /* Store the layout paramters */
+  curw = w;
+  curh = h;
+  curx = x;
+  cury = y;
+  
   /* Calculate actual dimensions based on constant ratios */
-  curw = w; curh = h; curx = x; cury = y;
   if(ct_wmvresize( WGAME, (int)(GAMEWIN_H*h), (int)(GAMEWIN_W*w), y, x ) == false)
     return false;
   if(ct_wmvresize( WSIDE, (int)(SIDEWIN_H*h), (int)(SIDEWIN_W*w) , y, x+(int)(GAMEWIN_W*w) ) == false)
