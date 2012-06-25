@@ -198,29 +198,6 @@ bool ct_process(int k) {
   static curX = 4, curY = 4;
   /* Handle key press */
   /* @TODO Send event to server etc. */
-  /* @TEST NOTE: THIS IS TEST CODE */
-  char *c;
-  if( k == 'p' ) {
-    c = ui_prompt(1,"ENTER:");
-    ui_printf(2,c);
-    free(c);
-  }else if( k == KEY_UP ) {
-    ui_place_obj(' ', curX, curY );
-    ui_place_obj('X', curX, --curY);
-    ct_wrefresh(WGAME);
-  }else if( k == KEY_LEFT ) {
-    ui_place_obj(' ', curX, curY );
-    ui_place_obj('X', --curX, curY);
-    ct_wrefresh(WGAME);
-  }else if( k == KEY_DOWN ) {
-    ui_place_obj(' ', curX, curY );
-    ui_place_obj('X', curX, ++curY);
-    ct_wrefresh(WGAME);
-  }else if( k == KEY_RIGHT ) {
-    ui_place_obj(' ', curX, curY );
-    ui_place_obj('X', ++curX, curY);
-    ct_wrefresh(WGAME);
-  }
   return true;
 }
 
