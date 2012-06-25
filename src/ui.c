@@ -44,7 +44,8 @@ void ui_init() {
   initscr();
   if(has_colors()) {
     start_color();
-  }else {
+  }
+  else {
     DEBUG("Crappy terminal has no colors. Not using any.");
   }
   
@@ -93,7 +94,8 @@ void ui_interact(int msec) {
   if(msec > 0) {
     total = msec;
     wtimeout(wndbox[WGAME],50);
-  }else{
+  }
+  else{
     total = 0;
   }
   
@@ -105,13 +107,15 @@ void ui_interact(int msec) {
       if(msec > 0) {
 	/* Timed out */
 	if(total <= 0) break;
-      }else {
+      }
+      else {
 	/* Probably a real error */
 	errlvl++;
 	if(errlvl >= 5) break;
 	break;
       }
-    }else {
+    }
+    else {
       ct_process(c);
     }
   }
@@ -153,8 +157,10 @@ char *ui_prompt(int doecho, const char *msg) {
   char *store;
 
   /* Set up modes */
-  if(doecho) echo();
-  else noecho();
+  if(doecho)
+    echo();
+  else
+    noecho();
   nocbreak();
   store = (char*)malloc(sizeof(char)*1024);
 
@@ -177,7 +183,8 @@ char *ui_prompt(int doecho, const char *msg) {
 /* Some bundled window operations (Change both window and border window) */
 
 bool ct_winit(WINDOW* w) {
-  if(w == 0) return false;
+  if(w == 0)
+    return false;
 
   /* Setup common properties */
   wtimeout(w,-1);
@@ -187,32 +194,44 @@ bool ct_winit(WINDOW* w) {
 }
 
 bool ct_wrefresh(int i) {
-  if(wrefresh(wnd[i]) == ERR || wrefresh(wndbox[i]) == ERR) return false;
+  if(wrefresh(wnd[i]) == ERR || wrefresh(wndbox[i]) == ERR)
+    return false;
   return true;
 }
 
 bool ct_wmvresize(int i, int h, int w, int y, int x) {
-  if(mvwin( wndbox[i], y, x ) == ERR) return false;
-  if(wresize( wndbox[i], h, w ) == ERR) return false;
-  if(mvwin( wnd[i], y+1, x+1 ) == ERR) return false;
-  if(wresize( wnd[i], h-2, w-2 ) == ERR) return false;
+  if(mvwin( wndbox[i], y, x ) == ERR)
+    return false;
+  if(wresize( wndbox[i], h, w ) == ERR)
+    return false;
+  if(mvwin( wnd[i], y+1, x+1 ) == ERR)
+    return false;
+  if(wresize( wnd[i], h-2, w-2 ) == ERR)
+    return false;
   return true;
 }
 
 bool ct_layout(int h, int w, int y, int x) {
   /* Calculate actual dimensions based on constant ratios */
   curw = w; curh = h; curx = x; cury = y;
-  if(ct_wmvresize( WGAME, (int)(GAMEWIN_H*h), (int)(GAMEWIN_W*w), y, x ) == false) return false;
-  if(ct_wmvresize( WSIDE, (int)(SIDEWIN_H*h), (int)(SIDEWIN_W*w) , y, x+(int)(GAMEWIN_W*w) ) == false) return false;
-  if(ct_wmvresize( WMSG, (int)(MSGWIN_H*h), (int)(MSGWIN_W*w), y+(int)(GAMEWIN_H*h), x ) == false) return false;
-  if(ct_border() == false) return false;
+  if(ct_wmvresize( WGAME, (int)(GAMEWIN_H*h), (int)(GAMEWIN_W*w), y, x ) == false)
+    return false;
+  if(ct_wmvresize( WSIDE, (int)(SIDEWIN_H*h), (int)(SIDEWIN_W*w) , y, x+(int)(GAMEWIN_W*w) ) == false)
+    return false;
+  if(ct_wmvresize( WMSG, (int)(MSGWIN_H*h), (int)(MSGWIN_W*w), y+(int)(GAMEWIN_H*h), x ) == false)
+    return false;
+  if(ct_border() == false)
+    return false;
   return true;
 }
 
 bool ct_border() {
-  if(box( wndbox[WGAME], 0, 0 ) == ERR) return false;
-  if(box( wndbox[WSIDE], 0, 0 ) == ERR) return false;
-  if(box( wndbox[WMSG], 0, 0 ) == ERR) return false;
+  if(box( wndbox[WGAME], 0, 0 ) == ERR)
+    return false;
+  if(box( wndbox[WSIDE], 0, 0 ) == ERR)
+    return false;
+  if(box( wndbox[WMSG], 0, 0 ) == ERR)
+    return false;
   return true;
 }
 
