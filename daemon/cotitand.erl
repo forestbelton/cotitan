@@ -8,7 +8,7 @@ start() ->
 
 start(Port) ->
   {ok, LSock} = gen_tcp:listen(Port, [binary, {active, false}, {reuseaddr, true}, {packet, 0}]),
-  io:format("listening on port ~w~n", [Port]),
+  io:format("start: listening on port ~w~n", [Port]),
   
   % Spawn the listener and client manager processes.
   Manager = spawn(fun() -> manage([]) end),
@@ -20,14 +20,19 @@ listen(LSock, Manager) ->
   
   % Print out some information about the client.
   {ok, {Address, Port}} = inet:peername(Sock),
-  io:format("client connected from ~w:~w~n", [Address, Port]),
+  io:format("listener: client connected from ~w:~w~n", [Address, Port]),
   
-  Manager ! {new_client, Sock},
+  Client = spawn(cot_client, new, [Sock, Manager]),
+  Manager ! {new_client, Client},
   listen(LSock, Manager).
 
 manage(Clients) ->
   receive
-    {new_client, Socket} ->
-      manage([Socket] ++ Clients)
+    {new_client, Client} ->
+      manage([Client] ++ Clients);
+    
+    {client_recv, _Client, Bytes} ->
+      io:format("manager: received ~w~n", [Bytes]),
+      manage(Clients)
   end.
 
