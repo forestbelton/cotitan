@@ -27,18 +27,17 @@ listen(LSock, Manager) ->
   listen(LSock, Manager).
 
 manage(Clients) ->
-  io:format("manager: clients = ~w~n", [Clients]),
-  
   receive
     {new_client, Client} ->
+      io:format("manager: ~w connected~n", [Client]),
       manage([Client] ++ Clients);
     
-    {client_recv, _Client, Bytes} ->
-      io:format("manager: received ~w~n", [Bytes]),
+    {client_recv, Client, Bytes} ->
+      io:format("manager: ~w sent ~w~n", [Client, Bytes]),
       manage(Clients);
     
-    {client_close, Client, _Error} ->
-      io:format("manager: removing client~n", []),
+    {client_close, Client, Error} ->
+      io:format("manager: ~w disconnected (reason: ~w)~n", [Client, Error]),
       manage(lists:delete(Client, Clients))
   end.
 
