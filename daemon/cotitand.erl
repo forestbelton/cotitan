@@ -27,12 +27,18 @@ listen(LSock, Manager) ->
   listen(LSock, Manager).
 
 manage(Clients) ->
+  io:format("manager: clients = ~w~n", [Clients]),
+  
   receive
     {new_client, Client} ->
       manage([Client] ++ Clients);
     
     {client_recv, _Client, Bytes} ->
       io:format("manager: received ~w~n", [Bytes]),
-      manage(Clients)
+      manage(Clients);
+    
+    {client_close, Client, _Error} ->
+      io:format("manager: removing client~n", []),
+      manage(lists:delete(Client, Clients))
   end.
 
