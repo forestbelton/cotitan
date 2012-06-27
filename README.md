@@ -12,6 +12,6 @@ Dependencies
 
 Building
 --------
-A simple `make cotitan cotitand` should suffice, assuming you have the correct
-dependencies as listed above.
+A simple `make` should suffice, assuming you have the correct dependencies as
+listed above.
 
