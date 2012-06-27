@@ -1,4 +1,8 @@
-.PHONY: cotitand clean
+.PHONY: all cotitan cotitand clean
+
+all: cotitan cotitand
+
+cotitan:
 
 cotitand:
 	cd daemon; $(MAKE) $(MAKEFLAGS)
