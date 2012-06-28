@@ -7,8 +7,9 @@ For more information about the game, check out the [wiki pages] (https://github.
 
 Dependencies
 ------------
+* Erlang runtime
 * A curses library (ncurses or pdcurses should be fine)
-* [nspr] (http://www.mozilla.org/projects/nspr/)
+* pthreads
 
 Building
 --------
