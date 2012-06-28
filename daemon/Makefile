@@ -5,4 +5,4 @@ BEAM_FILES=../cotitand.beam ../cot_client.beam
 cotitand:
 	erl -make
 clean:
-	rm $(BEAM_FILES)
+	rm -rf $(BEAM_FILES)
