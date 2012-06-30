@@ -1,2 +1,2 @@
-{'cotitand.erl', [{outdir, '..'}]}.
-{'cot_client.erl', [{outdir, '..'}]}.
+{'cotitand.erl', [{outdir, '.'}]}.
+{'cot_client.erl', [{outdir, '.'}]}.

@@ -1,4 +1,4 @@
-BEAM_FILES=../cotitand.beam ../cot_client.beam
+BEAM_FILES=cotitand.beam cot_client.beam
 
 .PHONY: cotitand clean
 
