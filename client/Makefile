@@ -1,5 +1,5 @@
 CC     =gcc
-CFLAGS =-Wall -Wextra -Werror -Wno-unused-parameter -ansi -pedantic
+CFLAGS =-Iinclude -Wall -Wextra -Werror -Wno-unused-parameter -ansi -pedantic
 LDFLAGS=-lpthread -lncurses
 
 CFILES=src/main.c src/ui.c src/net.c
