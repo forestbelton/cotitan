@@ -11,8 +11,11 @@ start(Port) ->
   io:format("start: listening on port ~w~n", [Port]),
   
   % Spawn the listener and client manager processes.
-  Manager = spawn(fun() -> manage([]) end),
-  spawn(fun() -> listen(LSock, Manager) end),
+  Manager  = spawn(fun() -> manage([]) end),
+  Listener = spawn(fun() -> listen(LSock, Manager) end),
+  
+  % Pass control over to the listener so the socket isn't closed.
+  gen_tcp:controlling_process(LSock, Listener),
   ok.
 
 listen(LSock, Manager) ->
