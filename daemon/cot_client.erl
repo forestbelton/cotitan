@@ -58,5 +58,5 @@ receiver(Client, Socket) ->
   {ok, <<Type:16/little, Data/binary>>} = gen_tcp:recv(Socket, Length),
   
   % Decode and loop.
-  cot_packet:decode(Client, Type, Data).
+  cot_packet:decode(Client, Type, Data),
   receiver(Client, Socket).

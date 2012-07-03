@@ -1,4 +1,4 @@
-BEAM_FILES=cotitand.beam cot_client.beam
+BEAM_FILES=cotitand.beam cot_client.beam cot_packet.beam
 
 .PHONY: cotitand clean
 
