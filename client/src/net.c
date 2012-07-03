@@ -31,6 +31,7 @@
 #  include <sys/types.h>
 #  include <netinet/in.h>
 #  include <sys/socket.h>
+#  include <unistd.h>
 #else
 #  include <winsock.h>
 #endif
