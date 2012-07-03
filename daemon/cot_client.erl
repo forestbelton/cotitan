@@ -23,7 +23,7 @@
 new(Socket, Manager) ->
   % Initialize the sender/receiever.
   Client     = self(),
-  Sender     = spawn_link(fun() -> sender(Socket) end),
+  Sender     = spawn_link(fun() -> sender(Socket)           end),
   Receiver   = spawn_link(fun() -> receiver(Client, Socket) end),
   
   % Catch exit signals and begin listening.
@@ -34,12 +34,6 @@ loop(Manager, Sender, Receiver) ->
   receive
     {client_send, Bytes} ->
       Sender ! {client_send, Bytes},
-      loop(Manager, Sender, Receiver);
-    
-    {client_recv, _Type, Data} ->
-      %TODO: Decode the packet.
-      % cot_packet:decode(Type, Data)
-      Manager ! {client_recv, self(), Data},
       loop(Manager, Sender, Receiver);
     
     {'EXIT', _Pid, Reason} ->
@@ -63,6 +57,6 @@ receiver(Client, Socket) ->
   {ok, <<Length:16/little>>}            = gen_tcp:recv(Socket, 2),
   {ok, <<Type:16/little, Data/binary>>} = gen_tcp:recv(Socket, Length),
   
-  % Send it to the controlling process.
-  Client ! {client_recv, Type, Data},
+  % Decode and loop.
+  cot_packet:decode(Client, Type, Data).
   receiver(Client, Socket).
