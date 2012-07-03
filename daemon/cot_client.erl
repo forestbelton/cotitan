@@ -21,10 +21,12 @@
 -export([new/2]).
 
 new(Socket, Manager) ->
-  % Initialize the sender/receiever and collect PIDs.
-  Controller = self(),
-  Sender     = spawn(fun() -> sender(Socket, Controller) end),
-  Receiver   = spawn(fun() -> receiver(Socket, Controller) end),
+  % Initialize the sender/receiever.
+  Sender     = spawn_link(fun() -> sender  (Socket) end),
+  Receiver   = spawn_link(fun() -> receiver(Socket) end),
+  
+  % Catch exit signals and begin listening.
+  process_flag(trap_exit, true),
   loop(Manager, Sender, Receiver).
 
 loop(Manager, Sender, Receiver) ->
@@ -40,30 +42,24 @@ loop(Manager, Sender, Receiver) ->
     
     {client_close, E} ->
       % Tell everyone that this process is going away.
-      Manager  ! {client_close, self(), E},
-      Sender   ! client_close,
+      Manager ! {client_close, self(), E},
+      exit(Sender,   kill),
+      exit(Receiver, kill),
       ok
   end.
 
-sender(Socket, Controller) ->
+sender(Socket) ->
   receive
     {client_send, Bytes} ->
-      case gen_tcp:send(Socket, Bytes) of
-        {error, E} ->
-          Controller ! {client_close, E};
-        _Else ->
-          sender(Socket, Controller)
-      end;
-    
-    client_close ->
-      ok
+      ok = gen_tcp:send(Socket, Bytes),
+      sender(Socket)
   end.
 
-receiver(Socket, Controller) ->
-  case gen_tcp:recv(Socket, 0) of
-    {error, E} ->
-      Controller ! {client_close, E};
-    {ok, Bytes} ->
-      Controller ! {client_recv, Bytes},
-      receiver(Socket, Controller)
-  end.
+receiver(Socket) ->
+  {ok, <<Length:16/little>>} = gen_tcp:recv(Socket, 2),
+  {ok, <<_Type:16/little, _Data/binary>>} = gen_tcp:recv(Socket, Length),
+  
+  % TODO: Decode packet.
+  % cot_packet:decode(Type, Data)
+  
+  receiver(Socket).
