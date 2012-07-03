@@ -78,6 +78,7 @@ int net_connect(const char *hostname, const char *port) {
     /* Try to connect. */
     ret = connect(sockfd, p->ai_addr, p->ai_addrlen);
     if(ret == -1) {
+      close(sockfd);
       perror("connect");
       continue;
     }
