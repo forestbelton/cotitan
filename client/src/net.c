@@ -23,6 +23,7 @@
 #include <pthread.h>
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #ifndef _WIN32_
 #  define  __USE_POSIX
@@ -62,7 +63,8 @@ int net_connect(const char *hostname, const char *port) {
   /* Resolve hostname. */
   ret = getaddrinfo(hostname, port, &hints, &info);
   if(ret != 0) {
-    fprintf(stderr, "getaddrinfo: %s\n", gai_strerror(ret));
+    fprintf(stderr, "getaddrinfo: %s\n", 
+        (ret == EAI_SYSTEM) ? strerror(errno): gai_strerror(ret));
     return 1;
   }
   
