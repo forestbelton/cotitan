@@ -22,8 +22,9 @@
 
 new(Socket, Manager) ->
   % Initialize the sender/receiever.
-  Sender     = spawn_link(fun() -> sender  (Socket) end),
-  Receiver   = spawn_link(fun() -> receiver(Socket) end),
+  Client     = self(),
+  Sender     = spawn_link(fun() -> sender(Socket) end),
+  Receiver   = spawn_link(fun() -> receiver(Client, Socket) end),
   
   % Catch exit signals and begin listening.
   process_flag(trap_exit, true),
@@ -32,15 +33,16 @@ new(Socket, Manager) ->
 loop(Manager, Sender, Receiver) ->
   receive
     {client_send, Bytes} ->
-      Sender ! {send, Bytes},
+      Sender ! {client_send, Bytes},
       loop(Manager, Sender, Receiver);
     
-    {client_recv, Bytes} ->
-      % Send it up the chain for now, until decoding is added.
-      Manager ! {client_recv, self(), Bytes},
+    {client_recv, _Type, Data} ->
+      %TODO: Decode the packet.
+      % cot_packet:decode(Type, Data)
+      Manager ! {client_recv, self(), Data},
       loop(Manager, Sender, Receiver);
     
-    {'EXIT', Pid, Reason} ->
+    {'EXIT', _Pid, Reason} ->
       % Crash and burn!
       Manager ! {client_close, self(), Reason},
       exit(Sender,   kill),
@@ -50,16 +52,17 @@ loop(Manager, Sender, Receiver) ->
 
 sender(Socket) ->
   receive
+    % Send whatever we're told to.
     {client_send, Bytes} ->
       ok = gen_tcp:send(Socket, Bytes),
       sender(Socket)
   end.
 
-receiver(Socket) ->
-  {ok, <<Length:16/little>>} = gen_tcp:recv(Socket, 2),
-  {ok, <<_Type:16/little, _Data/binary>>} = gen_tcp:recv(Socket, Length),
+receiver(Client, Socket) ->
+  % Read in a well-formed packet.
+  {ok, <<Length:16/little>>}            = gen_tcp:recv(Socket, 2),
+  {ok, <<Type:16/little, Data/binary>>} = gen_tcp:recv(Socket, Length),
   
-  % TODO: Decode packet.
-  % cot_packet:decode(Type, Data)
-  
-  receiver(Socket).
+  % Send it to the controlling process.
+  Client ! {client_recv, Type, Data},
+  receiver(Client, Socket).
