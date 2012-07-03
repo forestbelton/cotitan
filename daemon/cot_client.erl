@@ -40,9 +40,9 @@ loop(Manager, Sender, Receiver) ->
       Manager ! {client_recv, self(), Bytes},
       loop(Manager, Sender, Receiver);
     
-    {client_close, E} ->
-      % Tell everyone that this process is going away.
-      Manager ! {client_close, self(), E},
+    {'EXIT', Pid, Reason} ->
+      % Crash and burn!
+      Manager ! {client_close, self(), Reason},
       exit(Sender,   kill),
       exit(Receiver, kill),
       ok
