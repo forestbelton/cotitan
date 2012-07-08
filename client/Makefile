@@ -2,7 +2,7 @@ CC     =gcc
 CFLAGS =-Iinclude -Wall -Wextra -Werror -Wno-unused-parameter -ansi -pedantic
 LDFLAGS=-lpthread -lncurses
 
-CFILES=src/main.c src/ui.c src/net.c
+CFILES=src/main.c src/ui.c src/net.c src/fifo.c
 OFILES=$(CFILES:.c=.o)
 
 .PHONY: clean
