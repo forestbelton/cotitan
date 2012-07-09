@@ -40,6 +40,27 @@ fifo_t *fifo_new(void) {
   return out;
 }
 
+/* This should *only* be called when nothing is using the FIFO. */
+void fifo_destroy(fifo_t *f, void (*free_func)(void *)) {
+  void       *data;
+  fifo_msg_t *tmp;
+
+  while(f->head != NULL) {
+    tmp = f->head;
+    
+    /* Free message. */
+    data = tmp->value;
+    if(free_func != NULL)
+      free_func(data);
+    
+    /* Remove entry from FIFO. */
+    f->head = tmp->next;
+    free(tmp);
+  }
+  
+  pthread_mutex_destroy(&f->m);
+}
+
 int fifo_empty(fifo_t *f) {
   int empty;
   
