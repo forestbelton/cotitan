@@ -7,7 +7,8 @@ cotitan:
 	cp client/cotitan .
 cotitand:
 	cd daemon; $(MAKE) $(MAKEFLAGS)
-	echo -n "#!/bin/sh\ncd daemon; erl -s cotitand start -detached" > cotitand
+	echo "#!/bin/sh" > cotitand
+	echo "cd daemon; erl -s cotitand start -detached" >> cotitand
 	chmod +x cotitand
 clean:
 	cd client; $(MAKE) $(MAKEFLAGS) clean
