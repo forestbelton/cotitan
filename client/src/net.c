@@ -38,23 +38,24 @@
 
 static int net_connect(const char *hostname, const char *port);
 
-static int sockfd;
-
 void *net_task(void *info) {
+  int        sockfd;
   netinfo_t *ninfo = info;
   
-  if(net_connect(ninfo->host, ninfo->port))
+  sockfd = net_connect(ninfo->host, ninfo->port);
+  if(sockfd == -1)
     return NULL;
   
   printf("connected to %s:%s\n", ninfo->host, ninfo->port);
   while(1) {
+    
   }
   
   return NULL;
 }
 
 int net_connect(const char *hostname, const char *port) {
-  int             ret;
+  int             ret, sockfd;
   struct addrinfo hints, *info, *p;
   
   memset(&hints, 0, sizeof hints);
@@ -66,7 +67,7 @@ int net_connect(const char *hostname, const char *port) {
   if(ret != 0) {
     fprintf(stderr, "getaddrinfo: %s\n", 
         (ret == EAI_SYSTEM) ? strerror(errno): gai_strerror(ret));
-    return 1;
+    return -1;
   }
   
   /* Connect to the first available host. */
@@ -88,11 +89,11 @@ int net_connect(const char *hostname, const char *port) {
     
     /* We're done. Clean up and return. */
     freeaddrinfo(info);
-    return 0;
+    return sockfd;
   }
   
   fprintf(stderr, "no available hosts\n");
   freeaddrinfo(info);
-  return 1;
+  return -1;
 }
 
