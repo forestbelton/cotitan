@@ -3,14 +3,14 @@
 all: cotitan cotitand
 
 cotitan:
-	cd client; $(MAKE) $(MAKEFLAGS)
+	cd client; $(MAKE)
 	cp client/cotitan .
 cotitand:
-	cd daemon; $(MAKE) $(MAKEFLAGS)
+	cd daemon; $(MAKE)
 	echo "#!/bin/sh" > cotitand
 	echo "cd daemon; erl -s cotitand start -detached" >> cotitand
 	chmod +x cotitand
 clean:
-	cd client; $(MAKE) $(MAKEFLAGS) clean
-	cd daemon; $(MAKE) $(MAKEFLAGS) clean	
+	cd client; $(MAKE) clean
+	cd daemon; $(MAKE) clean	
 	rm -rf cotitan cotitand

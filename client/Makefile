@@ -14,7 +14,7 @@ cotitan: $(OFILES)
 
 clean:
 	rm -rf $(OFILES) cotitan
-	cd test; $(MAKE) $(MAKEFLAGS) clean
+	cd test; $(MAKE) clean
 
 test: cotitan
-	cd test; $(MAKE) $(MAKEFLAGS)
+	cd test; $(MAKE)
