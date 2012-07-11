@@ -35,7 +35,7 @@ typedef struct {
 } fifo_t;
 
 fifo_t *fifo_new    (void);
-void    fifo_destroy(fifo_t *f);
+void    fifo_destroy(fifo_t *f, void (*free_func)(void *));
 void   *fifo_pop    (fifo_t *f);
 int     fifo_empty  (fifo_t *f);
 int     fifo_push   (fifo_t *f, void *value);
