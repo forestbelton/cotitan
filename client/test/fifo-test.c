@@ -31,7 +31,7 @@ int main() {
   
   assert(fifo_empty(f));
   free(data);
-  /* TODO: Free FIFO. */ 
+  fifo_destroy(f);
   
   return 0;
 }
