@@ -30,6 +30,7 @@
 #  include <netdb.h>
 #  include <sys/types.h>
 #  include <netinet/in.h>
+#  include <sys/select.h>
 #  include <sys/socket.h>
 #  include <unistd.h>
 #else
@@ -40,15 +41,37 @@ static int net_connect(const char *hostname, const char *port);
 
 void *net_task(void *info) {
   int        sockfd;
+  fd_set     readfds, writefds;
   netinfo_t *ninfo = info;
   
   sockfd = net_connect(ninfo->host, ninfo->port);
   if(sockfd == -1)
     return NULL;
-  
   printf("connected to %s:%s\n", ninfo->host, ninfo->port);
+  
+  /* Initialize fd sets for select(). */
+  FD_ZERO(&readfds);
+  FD_ZERO(&writefds);
+  FD_SET(sockfd, &readfds);
+  FD_SET(sockfd, &writefds);
+  
   while(1) {
+    /* Wait until we can read or write on the socket. */
+    if(select(sockfd + 1, &readfds, &writefds, NULL, NULL) == -1) {
+      perror("select");
+      close(sockfd);
+      return NULL;
+    }
     
+    /* We can read */
+    if(FD_ISSET(sockfd, &readfds))
+      if(net_read(sockfd) == -1)
+        return NULL;
+    
+    /* We can write */
+    if(FD_ISSET(sockfd, &writefds))
+      if(net_write(sockfd) == -1)
+        return NULL;
   }
   
   return NULL;
@@ -95,5 +118,13 @@ int net_connect(const char *hostname, const char *port) {
   fprintf(stderr, "no available hosts\n");
   freeaddrinfo(info);
   return -1;
+}
+
+int net_read(int sockfd) {
+  return 0;
+}
+
+int net_write(int sockfd) {
+  return 0;
 }
 

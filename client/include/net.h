@@ -26,7 +26,9 @@ typedef struct {
   char *port;
 } netinfo_t;
 
-void *net_task(void *info);
+void *net_task (void *info);
+int   net_read (int   sockfd);
+int   net_write(int   sockfd);
 
 #endif
 
