@@ -1,6 +1,6 @@
-.PHONY: all clean
+.PHONY: all clean test
 
-all: cotitan cotitand
+all: cotitan cotitand test
 
 cotitan:
 	cd client; $(MAKE)
@@ -10,6 +10,9 @@ cotitand:
 	echo "#!/bin/sh" > cotitand
 	echo "cd daemon; erl -s cotitand start -detached" >> cotitand
 	chmod +x cotitand
+test:
+	cd client; $(MAKE) test
+
 clean:
 	cd client; $(MAKE) clean
 	cd daemon; $(MAKE) clean	
