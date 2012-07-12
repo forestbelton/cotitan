@@ -21,9 +21,11 @@
 #include "cotitan.h"
 #include "fifo.h"
 #include "net.h"
+#include "packet.h"
 
 #include <pthread.h>
 #include <stdio.h>
+#include <stdlib.h>
 #include <string.h>
 #include <errno.h>
 
@@ -129,16 +131,60 @@ int net_read(int sockfd) {
 }
 
 int net_write(int sockfd) {
-  /*static size_t      idx = 0;*/
-  static fifo_msg_t *m   = NULL;
+  enum {
+    SEND_LENGTH,
+    SEND_TYPE,
+    SEND_DATA
+  };
+  
+  static ssize_t   idx   = 0;
+  static size_t    state = SEND_LENGTH;
+  static packet_t *pkt   = NULL;
+  
+  ssize_t ret;
   
   /* Nothing to send. Fetch more off queue. */
-  if(m == NULL) {
-    m = fifo_pop(packet_queue);
+  if(pkt == NULL) {
+    pkt = fifo_pop(packet_queue);
     
     /* No data on the queue. */
-    if(m == NULL)
+    if(pkt == NULL)
       return 0;
+  }
+  
+  switch(state) {
+    case SEND_LENGTH:
+      ret = send(sockfd, &pkt->length, sizeof pkt->length, 0);
+      
+      if(ret != sizeof pkt->type)
+        return -1;
+      state = SEND_TYPE;
+    break;
+    
+    case SEND_TYPE:
+      ret = send(sockfd, &pkt->type, sizeof pkt->type, 0);
+      
+      if(ret != sizeof pkt->type)
+        return -1;
+      state = SEND_DATA;
+    break;
+    
+    case SEND_DATA:
+      ret = send(sockfd, &pkt->data[idx], pkt->length - 2 - idx, 0);
+      
+      if(ret == -1)
+        return -1;
+      else
+        idx += ret;
+      
+      /* We're done sending a packet. Clean up and reset state. */
+      if(idx == pkt->length - 2) {
+        state = SEND_LENGTH;
+        idx   = 0;
+        free(pkt);
+        pkt   = NULL;
+      }
+    break;
   }
   
   return 0;
