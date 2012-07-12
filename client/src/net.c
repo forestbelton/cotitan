@@ -131,60 +131,49 @@ int net_read(int sockfd) {
 }
 
 int net_write(int sockfd) {
-  enum {
-    SEND_LENGTH,
-    SEND_TYPE,
-    SEND_DATA
-  };
-  
-  static ssize_t   idx   = 0;
-  static size_t    state = SEND_LENGTH;
-  static packet_t *pkt   = NULL;
+  static ssize_t  idx  = 0;
+  static ssize_t  len  = 0;
+  static uint8_t *data = NULL;
   
   ssize_t ret;
   
   /* Nothing to send. Fetch more off queue. */
-  if(pkt == NULL) {
-    pkt = fifo_pop(packet_queue);
+  if(data == NULL) {
+    packet_t *pkt = fifo_pop(packet_queue);
     
     /* No data on the queue. */
     if(pkt == NULL)
       return 0;
+    
+    /* Convert fields to host byte order (little endian). */
+    pkt->length = ntohs(pkt->length);
+    pkt->type   = ntohs(pkt->type);
+    
+    /* Serialize data into a single buffer. */
+    idx  = 0;
+    len  = pkt->length + sizeof (uint16_t) * 2;
+    data = malloc(len);
+     
+    memcpy(&data[0], &pkt->length,  sizeof pkt->length);
+    memcpy(&data[2], &pkt->type,    sizeof pkt->type);
+    memcpy(&data[4], &pkt->data[0], pkt->length);
+    
+    /* Free original packet structure. */
+    free(pkt);
   }
   
-  switch(state) {
-    case SEND_LENGTH:
-      ret = send(sockfd, &pkt->length, sizeof pkt->length, 0);
-      
-      if(ret != sizeof pkt->type)
-        return -1;
-      state = SEND_TYPE;
-    break;
-    
-    case SEND_TYPE:
-      ret = send(sockfd, &pkt->type, sizeof pkt->type, 0);
-      
-      if(ret != sizeof pkt->type)
-        return -1;
-      state = SEND_DATA;
-    break;
-    
-    case SEND_DATA:
-      ret = send(sockfd, &pkt->data[idx], pkt->length - 2 - idx, 0);
-      
-      if(ret == -1)
-        return -1;
-      else
-        idx += ret;
-      
-      /* We're done sending a packet. Clean up and reset state. */
-      if(idx == pkt->length - 2) {
-        state = SEND_LENGTH;
-        idx   = 0;
-        free(pkt);
-        pkt   = NULL;
-      }
-    break;
+  /* Send chunk of data. */
+  ret = send(sockfd, &data[idx], len - idx, 0);
+  if(ret == -1) {
+    perror("send");
+    close(sockfd);
+    return -1;
+  }
+  
+  idx += ret;
+  if(idx == len) {
+    free(data);
+    data = NULL;
   }
   
   return 0;
