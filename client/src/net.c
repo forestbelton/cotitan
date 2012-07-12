@@ -18,6 +18,8 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
+#include "cotitan.h"
+#include "fifo.h"
 #include "net.h"
 
 #include <pthread.h>
@@ -125,6 +127,18 @@ int net_read(int sockfd) {
 }
 
 int net_write(int sockfd) {
+  /*static size_t      idx = 0;*/
+  static fifo_msg_t *m   = NULL;
+  
+  /* Nothing to send. Fetch more off queue. */
+  if(m == NULL) {
+    m = fifo_pop(packet_queue);
+    
+    /* No data on the queue. */
+    if(m == NULL)
+      return 0;
+  }
+  
   return 0;
 }
 

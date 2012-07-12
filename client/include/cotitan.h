@@ -18,34 +18,13 @@
 * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 * THE SOFTWARE.
 */
-#include "cotitan.h"
+#ifndef COTITAN_COTITAN_H_
+#define COTITAN_COTITAN_H_
+
 #include "fifo.h"
-#include "net.h"
-#include <pthread.h>
-#include <stdio.h>
-#include <stdlib.h>
 
-extern void *ui_task(void *);
+extern fifo_t *packet_queue;
+extern fifo_t *event_queue;
 
-fifo_t *packet_queue;
-fifo_t *event_queue;
-
-int main(int argc, char *argv[]) {
-  pthread_t ui, net;
-  netinfo_t ninfo = {
-    "localhost",
-    "48581"
-  };
-  
-  packet_queue = fifo_new();
-  if(packet_queue == NULL) {
-    fprintf(stderr, "error: failed to create packet queue\n");
-    exit(EXIT_FAILURE);
-  }
-  
-  pthread_create(&ui,  NULL, ui_task,  NULL);
-  pthread_create(&net, NULL, net_task, &ninfo);
-  
-  pthread_exit(NULL);
-}
+#endif
 
