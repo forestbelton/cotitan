@@ -27,7 +27,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-fifo_t *packet_queue;
 fifo_t *event_queue;
 
 int main(int argc, char *argv[]) {

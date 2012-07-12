@@ -39,6 +39,8 @@
 #  include <winsock.h>
 #endif
 
+fifo_t *packet_queue;
+
 static int net_connect(const char *hostname, const char *port);
 
 void *net_task(void *info) {
