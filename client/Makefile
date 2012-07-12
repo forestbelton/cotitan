@@ -1,5 +1,5 @@
 export CC      := gcc
-export CFLAGS  := -I$(shell pwd)/include -Wall -Wextra -Werror -Wno-unused-parameter -ansi -pedantic
+export CFLAGS  := -I$(shell pwd)/include -Wall -Wextra -Werror -Wno-unused-parameter -std=c99 -pedantic
 export LDFLAGS := -lpthread -lncurses
 export CFILES  := src/main.c src/ui.c src/net.c src/fifo.c
 export OFILES  := $(CFILES:.c=.o)

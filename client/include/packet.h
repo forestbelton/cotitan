@@ -21,6 +21,8 @@
 #ifndef COTITAN_PACKET_H_
 #define COTITAN_PACKET_H_
 
+#include <stdint.h>
+
 typedef struct {
   uint16_t  length;
   uint16_t  type;
