@@ -1,4 +1,4 @@
-cotitan
+cotitan [![Build Status](https://secure.travis-ci.org/[YOUR_GITHUB_USERNAME]/[YOUR_PROJECT_NAME].png)](http://travis-ci.org/leroux/cotitan)
 =======
 cotitan is a turn-based, multiplayer game that revolves around killing large
 things (titans). While your character is certainly heroic, they aren't heroic
