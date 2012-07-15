@@ -10,3 +10,4 @@ clean:
 
 % : %.c
 	$(CC) $(CFLAGS) $(LDFLAGS) $(OFILES) $< -o $@
+	./$@

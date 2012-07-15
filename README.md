@@ -1,4 +1,4 @@
-cotitan
+cotitan [![Build Status](https://secure.travis-ci.org/forestbelton/cotitan.png)](http://travis-ci.org/forestbelton/cotitan)
 =======
 cotitan is a turn-based, multiplayer game that revolves around killing large
 things (titans). While your character is certainly heroic, they aren't heroic
@@ -15,4 +15,3 @@ Building
 --------
 A simple `make` should suffice, assuming you have the correct dependencies as
 listed above.
-

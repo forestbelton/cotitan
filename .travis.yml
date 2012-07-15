@@ -1,0 +1,8 @@
+before_script:
+  - sudo apt-get update
+  - sudo apt-get install erlang libncurses5-dev
+script: "make"
+notifications:
+  irc: "irc.hackthissite.org#fezrev"
+  email:
+    - leroux@fezrev.com
