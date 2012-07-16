@@ -54,8 +54,8 @@ sender(Socket) ->
 
 receiver(Client, Socket) ->
   % Read in a well-formed packet.
-  {ok, <<Length:16/little>>}            = gen_tcp:recv(Socket, 2),
-  {ok, <<Type:16/little, Data/binary>>} = gen_tcp:recv(Socket, Length),
+  {ok, <<Length:16/big>>}            = gen_tcp:recv(Socket, 2),
+  {ok, <<Type:16/big, Data/binary>>} = gen_tcp:recv(Socket, Length),
   
   % Decode and loop.
   cot_packet:decode(Client, Type, Data),
