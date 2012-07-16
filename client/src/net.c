@@ -146,8 +146,8 @@ int net_write(int sockfd) {
       return 0;
     
     /* Convert fields to host byte order (little endian). */
-    pkt->length = ntohs(pkt->length);
-    pkt->type   = ntohs(pkt->type);
+    pkt->length = htons(pkt->length);
+    pkt->type   = htons(pkt->type);
     
     /* Serialize data into a single buffer. */
     idx  = 0;
