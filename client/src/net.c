@@ -22,6 +22,7 @@
 #include "fifo.h"
 #include "net.h"
 #include "packet.h"
+#include "ui.h"
 
 #include <pthread.h>
 #include <stdio.h>
@@ -53,7 +54,7 @@ void *net_task(void *info) {
   sockfd = net_connect(ninfo->host, ninfo->port);
   if(sockfd == -1)
     return NULL;
-  printf("connected to %s:%s\n", ninfo->host, ninfo->port);
+  ui_printf("connected to %s:%s\n", ninfo->host, ninfo->port);
   
   /* Initialize fd sets for select(). */
   FD_ZERO(&readfds);

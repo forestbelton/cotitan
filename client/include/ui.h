@@ -21,7 +21,17 @@
 #ifndef COTITAN_UI_H_
 #define COTITAN_UI_H_
 
-void *ui_task(void *info);
+typedef enum {
+  UI_MSG_PRINT
+} ui_msgtype_t;
+
+typedef struct {
+  ui_msgtype_t  type;
+  void         *data;
+} ui_msg_t;
+
+void *ui_task (void *info);
+void ui_printf(const char *msg, ...);
 
 #endif
 

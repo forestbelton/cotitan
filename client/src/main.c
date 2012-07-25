@@ -27,8 +27,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-fifo_t *event_queue;
-
 int main(int argc, char *argv[]) {
   pthread_t ui, net;
   netinfo_t ninfo = {
@@ -36,6 +34,12 @@ int main(int argc, char *argv[]) {
     "48581"
   };
   
+  event_queue = fifo_new();
+  if(event_queue == NULL) {
+    fprintf(stderr, "error: failed to create event queue\n");
+    exit(EXIT_FAILURE);
+  }
+
   packet_queue = fifo_new();
   if(packet_queue == NULL) {
     fprintf(stderr, "error: failed to create packet queue\n");
@@ -45,6 +49,9 @@ int main(int argc, char *argv[]) {
   pthread_create(&ui,  NULL, ui_task,  NULL);
   pthread_create(&net, NULL, net_task, &ninfo);
   
+  pthread_join(net, NULL);
+  pthread_join(ui,  NULL);
+
   pthread_exit(NULL);
 }
 
