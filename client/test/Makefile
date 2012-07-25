@@ -9,4 +9,4 @@ clean:
 	rm -rf $(EXEFILES)
 
 % : %.c
-	$(CC) $(CFLAGS) $(LDFLAGS) $(OFILES) $< -o $@
+	$(CC) $(CFLAGS) $(OFILES) $(LDFLAGS) $< -o $@
