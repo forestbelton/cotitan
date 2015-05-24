@@ -1,3 +1,7 @@
 # Generated binaries
 cotitan
 cotitand
+target/
+.idea/
+.idea_modules/
+.DS_Store/
