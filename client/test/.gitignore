@@ -1,5 +1,0 @@
-# C object files.
-*.o
-
-# Test binaries.
-fifo-test
