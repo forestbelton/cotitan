@@ -26,5 +26,12 @@ export default {
             type,
             func
         });
+    },
+
+    send: function(type, data) {
+        socket.send(JSON.stringify({
+            type,
+            data
+        }));
     }
 };
