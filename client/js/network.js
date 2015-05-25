@@ -1,6 +1,9 @@
 var socket = null;
 var cbs    = [];
 
+var inited = false;
+var queued = [];
+
 export default {
     init: function(url) {
         if(socket != null) {
@@ -8,6 +11,13 @@ export default {
         }
 
         socket = new WebSocket(url);
+
+        socket.onopen = () => {
+            inited = true;
+            queued.forEach(([type, data]) => this.send(type, data));
+            queued = [];
+        };
+
         socket.onmessage = event => {
             const json = JSON.parse(event.data),
                 type = json.type,
@@ -29,6 +39,11 @@ export default {
     },
 
     send: function(type, data) {
+        if(!inited) {
+            queued.push([type, data]);
+            return;
+        }
+
         socket.send(JSON.stringify({
             type,
             data
