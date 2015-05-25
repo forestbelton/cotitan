@@ -20,7 +20,7 @@ object Build extends Build {
             resolvers           += "Typesafe Repository" at "http://repo.typesafe.com/typesafe/releases/",
             resolvers           += "Plasma Conduit Repository" at "http://dl.bintray.com/plasmaconduit/releases",
             resolvers           += "Spray" at "http://repo.spray.io",
-            libraryDependencies += "com.typesafe.akka" % "akka-actor" % "2.0",
+            libraryDependencies += "com.typesafe.akka" %% "akka-actor" % "2.3.9",
             libraryDependencies += "com.wandoulabs.akka" %% "spray-websocket" % "0.1.4",
             libraryDependencies += "com.plasmaconduit" %% "json" % "0.19.0"
         )
