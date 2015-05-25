@@ -7,12 +7,10 @@ For more information about the game, check out the [wiki pages] (https://github.
 
 Dependencies
 ------------
-* Erlang runtime
-* A curses library (ncurses or pdcurses should be fine)
-* pthreads
+* JRE
+* sbt (for development)
 
 Building
 --------
-A simple `make` should suffice, assuming you have the correct dependencies as
-listed above.
+To start up a development server, run `sbt ~reStart`. This will also reload the server whenever there is a code change.
 
