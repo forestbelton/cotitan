@@ -1,6 +1,6 @@
-package com.cotitan.server
+package com.cotitan.server.websocket
 
-import akka.actor.{ActorLogging, Props, Actor}
+import akka.actor.{Actor, ActorLogging, Props}
 import spray.can.Http
 
 object WebSocketServer {
