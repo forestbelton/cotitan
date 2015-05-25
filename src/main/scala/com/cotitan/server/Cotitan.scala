@@ -1,6 +1,6 @@
 package com.cotitan.server
 
-import akka.actor.ActorSystem
+import akka.actor.{Props, ActorSystem}
 import akka.io.IO
 import com.cotitan.server.websocket.WebSocketServer
 import spray.can.Http
@@ -13,7 +13,8 @@ object Cotitan {
 
     implicit val system = ActorSystem()
 
-    val server = system.actorOf(WebSocketServer.props(), "websocket")
+    val router = system.actorOf(Props(classOf[Router]))
+    val server = system.actorOf(WebSocketServer.props(router), "websocket")
 
     IO(UHttp) ! Http.Bind(server, "localhost", 8400)
   }

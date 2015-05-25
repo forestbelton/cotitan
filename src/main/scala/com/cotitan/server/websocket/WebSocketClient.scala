@@ -7,18 +7,17 @@ import spray.routing.HttpServiceActor
 
 object WebSocketClient {
 
-  def props(serverConnection: ActorRef) = Props(classOf[WebSocketClient], serverConnection)
+  def props(serverConnection: ActorRef, router: ActorRef) = Props(classOf[WebSocketClient], serverConnection, router)
 
 }
 
-final case class WebSocketClient(serverConnection: ActorRef) extends HttpServiceActor with WebSocketServerWorker {
+final case class WebSocketClient(serverConnection: ActorRef, router: ActorRef) extends HttpServiceActor with WebSocketServerWorker {
 
   override def businessLogic: Receive = {
     case t: TextFrame => {
       val data = t.payload.decodeString("UTF-8")
-      println(s"payload: $data")
 
-      // SHOULD ROUTE PAYLOAD HERE
+      router ! data
 
       sender() ! t
     }
