@@ -2,6 +2,7 @@ package com.cotitan.server
 
 import akka.actor.{Props, ActorSystem}
 import akka.io.IO
+import com.cotitan.server.routing.Router
 import com.cotitan.server.websocket.WebSocketServer
 import spray.can.Http
 import spray.can.server.UHttp

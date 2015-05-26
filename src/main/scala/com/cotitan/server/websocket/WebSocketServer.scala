@@ -3,12 +3,6 @@ package com.cotitan.server.websocket
 import akka.actor.{ActorRef, Actor, ActorLogging, Props}
 import spray.can.Http
 
-object WebSocketServer {
-
-  def props(router: ActorRef) = Props(classOf[WebSocketServer], router)
-
-}
-
 final case class WebSocketServer(router: ActorRef) extends Actor with ActorLogging {
 
   override def receive = {
@@ -20,5 +14,11 @@ final case class WebSocketServer(router: ActorRef) extends Actor with ActorLoggi
       serverConnection ! Http.Register(connection)
     }
   }
+
+}
+
+object WebSocketServer {
+
+  def props(router: ActorRef) = Props(classOf[WebSocketServer], router)
 
 }
