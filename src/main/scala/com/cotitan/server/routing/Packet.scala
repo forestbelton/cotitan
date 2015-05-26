@@ -31,6 +31,7 @@ object Packet {
 
   private def getPayload(route: String, payload: JsValue): Validation[String, Payload] = route match {
     case "hello" => payload.as[Hello]
+    case _       => Failure("Invalid route specified.")
   }
 
   def parse(input: String): Validation[String, Packet] = {
